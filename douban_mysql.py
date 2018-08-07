@@ -119,18 +119,23 @@ class douban_mysql:
 		else:
 			return False
 
-	def get_movie_list(self, save_path):
+	def get_movie_list(self, save_path, user_max=200, movie_max=500, get_movie=200):
 		'''
-		生成用于协同推荐的txt文件
-		:param save_path:
+		生成用于推荐系统的txt
+		:param save_path: 保存位置
+		:param user_max: 选取的最大用户数
+		:param movie_max: 每个用户的最小电影数
+		:param get_movie: 最终获取的每个用户的电影数
 		:return:
 		'''
-		sql = "select user_id from douban_movie GROUP BY user_id HAVING count(user_id)>500;"
+		sql = "select user_id from douban_movie GROUP BY user_id HAVING count(user_id)>%s limit %s;" % (
+			movie_max, user_max)
 		self.cursor.execute(sql)
 		all = self.cursor.fetchall()
 		for item in all:
 			id = item[0]
-			sql_tmp = "SELECT user_id,name,score as number,movie_path FROM douban_movie WHERE score>0 and user_id=%s limit 200;" % id
+			sql_tmp = "SELECT user_id,name,score as number,movie_path FROM douban_movie WHERE score>0 and user_id=%s limit %s;" % (
+			id, get_movie)
 			self.cursor.execute(sql_tmp)
 			results = self.cursor.fetchall()
 			for result in results:
