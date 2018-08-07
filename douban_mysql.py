@@ -191,6 +191,21 @@ class douban_mysql:
 		else:
 			return None
 
+	def find_movie_by_id(self,id):
+		'''
+		根据id查找相应的电影
+		:param id:
+		:return:
+		'''
+		sql = "SELECT name FROM movie_list WHERE id=%s"%id
+		self.cursor.execute(sql)
+		one = self.cursor.fetchone()
+		if one:
+			print('''the movie is %s'''%one[0])
+		else:
+			print('didn\'t find this movie')
 
 if __name__ == '__main__':
-	factory = douban_mysql(True)
+	# factory = douban_mysql(True)
+	factory = douban_mysql()
+	factory.find_movie_by_id(448)
