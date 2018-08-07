@@ -35,6 +35,10 @@ class douban_mysql:
 			self.cursor.execute(sql_2)
 			sql_3 = 'CREATE TABLE IF NOT EXISTS movie_list (id INT AUTO_INCREMENT ,name VARCHAR(255) NOT NULL, summary TEXT NOT NULL,movie_path VARCHAR(255) NOT NULL, PRIMARY KEY (id))'
 			self.cursor.execute((sql_3))
+			sql_4 = 'CREATE TABLE IF NOT EXISTS userRecs_list (id INT AUTO_INCREMENT ,user_id INT NOT NULL, movie_id TEXT NOT NULL, PRIMARY KEY (id))'
+			self.cursor.execute(sql_4)
+			sql_5 = 'CREATE TABLE IF NOT EXISTS movieRecs_list (id INT AUTO_INCREMENT ,movie_id INT NOT NULL, user_id TEXT NOT NULL, PRIMARY KEY (id))'
+			self.cursor.execute(sql_5)
 
 	def add_user(self, username, movie_all, home):
 		'''
@@ -175,6 +179,68 @@ class douban_mysql:
 			print('add douban_movie fail')
 			self.db.rollback()
 
+	def add_recommend_user(self, userId, movieId):
+		'''
+		基于用户的推荐列表
+		:param userId:
+		:param movieId:
+		:return:
+		'''
+		sql = 'INSERT INTO userRecs_list(user_id,movie_id) values(%s,%s)'
+		try:
+			self.cursor.execute(sql, (userId, movieId))
+			self.db.commit()
+		except:
+			print('add douban_movie fail')
+			self.db.rollback()
+
+	def update_recommend_user(self, userId, movieId):
+		'''
+		更新基于用户的推荐列表
+		:param userId:
+		:param movieId:
+		:return:
+		'''
+		sql = '''UPDATE userRecs_list SET movie_id='%s' WHERE user_id=%s''' % (movieId, userId)
+		try:
+			self.cursor.execute(sql)
+			self.db.commit()
+			print('update userRecs_list successful')
+		except:
+			print('update userRecs_list fail')
+			self.db.rollback()
+
+	def add_recommend_movie(self, movieId, userId):
+		'''
+		基于电影的推荐列表
+		:param movieId:
+		:param userId:
+		:return:
+		'''
+		sql = 'INSERT INTO movieRecs_list(movie_id,user_id) values(%s,%s)'
+		try:
+			self.cursor.execute(sql, (movieId, userId))
+			self.db.commit()
+		except:
+			print('add douban_movie fail')
+			self.db.rollback()
+
+	def update_recommend_movie(self, movieId, userId):
+		'''
+		更新基于用户的推荐列表
+		:param userId:
+		:param movieId:
+		:return:
+		'''
+		sql = '''UPDATE movieRecs_list SET user_id='%s' WHERE movie_id=%s''' % (userId, movieId)
+		try:
+			self.cursor.execute(sql)
+			self.db.commit()
+			print('update movieRecs_list successful')
+		except:
+			print('update movieRecs_list fail')
+			self.db.rollback()
+
 	def find_movie_id(self, movie_path, name):
 		'''
 		查询一部电影是否已经在movie_list中
@@ -191,13 +257,13 @@ class douban_mysql:
 		else:
 			return None
 
-	def find_movie_by_id(self,id):
+	def find_movie_by_id(self, id):
 		'''
 		根据id查找相应的电影
 		:param id:
 		:return:
 		'''
-		sql = "SELECT name FROM movie_list WHERE id=%s"%id
+		sql = "SELECT name FROM movie_list WHERE id=%s" % id
 		self.cursor.execute(sql)
 		one = self.cursor.fetchone()
 		if one:
@@ -205,7 +271,51 @@ class douban_mysql:
 		else:
 			return None
 
+	def find_user_by_id(self, id):
+		'''
+		根据id查找对应的用户
+		:param id:
+		:return:
+		'''
+		sql = "SELECT name FROM douban_user WHERE id=%s" % id
+		self.cursor.execute(sql)
+		one = self.cursor.fetchone()
+		if one:
+			return one[0]
+		else:
+			return None
+
+	def find_user_in_rec(self, id):
+		'''
+		在推荐列表中查找用户用于更新推荐
+		:param id:
+		:return:
+		'''
+		sql = "SELECT * FROM userRecs_list where user_id=%s" % id
+		self.cursor.execute(sql)
+		one = self.cursor.fetchone()
+		if one:
+			print('this userId %s is already exists' % id)
+			return True
+		else:
+			return False
+
+	def find_movie_in_rec(self, id):
+		'''
+		在推荐列表中查找电影用于更新推荐
+		:param id:
+		:return:
+		'''
+		sql = "SELECT * FROM movieRecs_list where movie_id=%s" % id
+		self.cursor.execute(sql)
+		one = self.cursor.fetchone()
+		if one:
+			print('this movieId %s is already exists' % id)
+			return True
+		else:
+			return False
+
+
 if __name__ == '__main__':
 	# factory = douban_mysql(True)
 	factory = douban_mysql()
-	factory.find_movie_by_id(448)
