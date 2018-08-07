@@ -201,9 +201,9 @@ class douban_mysql:
 		self.cursor.execute(sql)
 		one = self.cursor.fetchone()
 		if one:
-			print('''the movie is %s'''%one[0])
+			return one[0]
 		else:
-			print('didn\'t find this movie')
+			return None
 
 if __name__ == '__main__':
 	# factory = douban_mysql(True)
