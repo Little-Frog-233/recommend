@@ -1,3 +1,5 @@
 # 基于协同过滤的推荐系统小实验
 # 其中collaborative_filtering_by_spark为基于协同过滤的推荐系统
+
+在collaborative_filtering_by_spark目录下，collaborative_filtering_by_spark.py脚本将基于爬取到的豆瓣数据建立推荐列表，并存入数据库以便在进行推荐时去用
 # 其中user_spider_by_spark为基于Spark的分布式爬虫
