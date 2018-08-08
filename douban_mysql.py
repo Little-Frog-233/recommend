@@ -37,7 +37,7 @@ class douban_mysql:
 			self.cursor.execute((sql_3))
 			sql_4 = 'CREATE TABLE IF NOT EXISTS userRecs_list (id INT AUTO_INCREMENT ,user_id INT NOT NULL, movie_id TEXT NOT NULL, PRIMARY KEY (id))'
 			self.cursor.execute(sql_4)
-			sql_5 = 'CREATE TABLE IF NOT EXISTS movieRecs_list (id INT AUTO_INCREMENT ,movie_id INT NOT NULL, user_id TEXT NOT NULL, PRIMARY KEY (id))'
+			sql_5 = 'CREATE TABLE IF NOT EXISTS movieRecs_list (id INT AUTO_INCREMENT ,movie_id INT NOT NULL, movie_id_list TEXT NOT NULL, PRIMARY KEY (id))'
 			self.cursor.execute(sql_5)
 
 	def add_user(self, username, movie_all, home):
@@ -135,7 +135,7 @@ class douban_mysql:
 		for item in all:
 			id = item[0]
 			sql_tmp = "SELECT user_id,name,score as number,movie_path FROM douban_movie WHERE score>0 and user_id=%s limit %s;" % (
-			id, get_movie)
+				id, get_movie)
 			self.cursor.execute(sql_tmp)
 			results = self.cursor.fetchall()
 			for result in results:
@@ -222,7 +222,7 @@ class douban_mysql:
 		:param userId:
 		:return:
 		'''
-		sql = 'INSERT INTO movieRecs_list(movie_id,user_id) values(%s,%s)'
+		sql = 'INSERT INTO movieRecs_list(movie_id,movie_id_list) values(%s,%s)'
 		try:
 			self.cursor.execute(sql, (movieId, userId))
 			self.db.commit()
@@ -237,7 +237,7 @@ class douban_mysql:
 		:param movieId:
 		:return:
 		'''
-		sql = '''UPDATE movieRecs_list SET user_id='%s' WHERE movie_id=%s''' % (userId, movieId)
+		sql = '''UPDATE movieRecs_list SET movie_id_list='%s' WHERE movie_id=%s''' % (userId, movieId)
 		try:
 			self.cursor.execute(sql)
 			self.db.commit()
@@ -320,7 +320,39 @@ class douban_mysql:
 		else:
 			return False
 
+	def userRec_list(self, id):
+		'''
+		查找指定用户的推荐列表
+		:param id:用户id
+		:return: 推荐列表
+		'''
+		sql = "SELECT movie_id FROM userRecs_list WHERE user_id=%s" % id
+		self.cursor.execute(sql)
+		one = self.cursor.fetchone()
+		if one:
+			return [int(i) for i in one[0].strip('[').strip(']').split(',')]
+		else:
+			print('this user %s not in userRecs_list' % id)
+			return None
+
+	def movieRec_list(self, id):
+		'''
+		查找指定电影的推荐列表
+		:param id: 电影id
+		:return: 推荐列表
+		'''
+		sql = "SELECT movie_id_list FROM movieRecs_list WHERE movie_id=%s" % id
+		self.cursor.execute(sql)
+		one = self.cursor.fetchone()
+		if one:
+			return [int(i) for i in one[0].strip('[').strip(']').split(', ')]
+		else:
+			print('this movie %s not in movieRecs_list' % id)
+			return None
+
 
 if __name__ == '__main__':
 	# factory = douban_mysql(True)
 	factory = douban_mysql()
+	print(factory.movieRec_list(1))
+	print(factory.userRec_list(1))
