@@ -11,7 +11,7 @@ from selenium.webdriver.support.wait import WebDriverWait
 from pyquery import PyQuery as pq
 
 url = 'https://movie.douban.com/people/7542909/collect?start=0&sort=time&rating=all&filter=all&mode=grid'
-path = '/Users/ruicheng/chromedriver01/chromedriver'
+path = 'chromedriver'
 browser = webdriver.Chrome(path)
 wait = WebDriverWait(browser, 5)
 
