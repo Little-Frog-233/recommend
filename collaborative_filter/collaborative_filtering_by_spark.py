@@ -119,5 +119,5 @@ class cf_recommend:
 
 if __name__ == '__main__':
 	test_rank([5,10,15,20,25])
-	# cf_recommend = cf_recommend(5)
-	# cf_recommend.run()
+	cf_recommend = cf_recommend(5)
+	cf_recommend.run()
