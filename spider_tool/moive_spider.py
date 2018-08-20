@@ -14,7 +14,7 @@ from pyquery import PyQuery as pq
 
 
 class douban_movie(object):
-	def __init__(self, url_base, get_all=True, proxy=None,cookie=None):
+	def __init__(self, url_base, get_all=True, proxy=None, cookie=None):
 		'''
 		初始化
 		:param url_base: 初始网页
@@ -25,7 +25,7 @@ class douban_movie(object):
 		if cookie:
 			self.headers = {
 				'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 Safari/537.36',
-				'Cookie':cookie
+				'Cookie': cookie
 			}
 		else:
 			self.headers = {
@@ -67,6 +67,8 @@ class douban_movie(object):
 		id = self.factory.find_user(username=user_name)
 		if not id:
 			self.factory.add_user(user_name, int(movie_number), home)
+		else:
+			self.factory.update_user(id,int(movie_number))
 		return int(res[-2]), user_name, int(movie_number)
 
 	def get_message(self, index, username):
@@ -113,8 +115,8 @@ class douban_movie(object):
 					if not self.factory.find_movie(result['title'], result['movie_home'], id):
 						self.factory.add_movie(result['title'], result['summary'], id, user, result['gread'],
 						                       result['movie_home'])
-					if not self.factory.find_movie_id(result['movie_home'],result['title']):
-						self.factory.add_movie_list(result['title'],result['summary'],result['movie_home'])
+					if not self.factory.find_movie_id(result['movie_home'], result['title']):
+						self.factory.add_movie_list(result['title'], result['summary'], result['movie_home'])
 				except:
 					logging.error(traceback.print_exc())
 					continue
@@ -132,6 +134,11 @@ class douban_movie(object):
 						print('the user %s is already exists and his movie is over 500' % username)
 						return
 			try:
+				id = self.factory.find_user(username)
+				if id:
+					if self.factory.find_all(username, movie_number):
+						print('the user %s is already exists and his movie is over %s' % (username, movie_number))
+						return
 				for i in range(0, pageMax + 1):
 					print('start to spider page:', i)
 					time.sleep(2)
@@ -147,8 +154,8 @@ class douban_movie(object):
 			logging.error(traceback.print_exc())
 
 
-
 if __name__ == '__main__':
 	url_base = 'https://movie.douban.com/people/missixyujun/collect?'
-	douban = douban_movie(url_base, get_all=False, cookie='ll="118162"; bid=U56wYJDbrhk; __yadk_uid=JHaRtzO0RveGY2aklii3FhXUynaRNSKP; _vwo_uuid_v2=DD862A0E8F58D429AA1C18B903F91E656|d17d153455f722d9ae2235cce0e09c21; __utmc=30149280; __utmc=223695111; ct=y; douban-fav-remind=1; ps=y; ue="1342468180@qq.com"; push_noty_num=0; push_doumail_num=0; __utmv=30149280.17960; __utmz=223695111.1532661025.12.4.utmcsr=douban.com|utmccn=(referral)|utmcmd=referral|utmcct=/people/itzhaoxiangyu/; ap=1; __utmz=30149280.1532676725.15.5.utmcsr=accounts.douban.com|utmccn=(referral)|utmcmd=referral|utmcct=/safety/unlock_sms/resetpassword; dbcl2="179601793:74q7qMOcPrY"; ck=hBW1; _pk_ref.100001.4cf6=%5B%22%22%2C%22%22%2C1532684635%2C%22https%3A%2F%2Fwww.douban.com%2Fpeople%2Fitzhaoxiangyu%2F%22%5D; _pk_ses.100001.4cf6=*; __utma=30149280.546083573.1527832081.1532676725.1532684635.16; __utmb=30149280.0.10.1532684635; __utma=223695111.344951148.1527832081.1532676742.1532684635.16; __utmb=223695111.0.10.1532684635; _pk_id.100001.4cf6=0710816efa653b27.1527832081.16.1532684640.1532681254.')
+	douban = douban_movie(url_base, get_all=False,
+	                      cookie='ll="118162"; bid=U56wYJDbrhk; __yadk_uid=JHaRtzO0RveGY2aklii3FhXUynaRNSKP; _vwo_uuid_v2=DD862A0E8F58D429AA1C18B903F91E656|d17d153455f722d9ae2235cce0e09c21; __utmc=30149280; __utmc=223695111; ct=y; douban-fav-remind=1; ps=y; ue="1342468180@qq.com"; push_noty_num=0; push_doumail_num=0; __utmv=30149280.17960; __utmz=223695111.1532661025.12.4.utmcsr=douban.com|utmccn=(referral)|utmcmd=referral|utmcct=/people/itzhaoxiangyu/; ap=1; __utmz=30149280.1532676725.15.5.utmcsr=accounts.douban.com|utmccn=(referral)|utmcmd=referral|utmcct=/safety/unlock_sms/resetpassword; dbcl2="179601793:74q7qMOcPrY"; ck=hBW1; _pk_ref.100001.4cf6=%5B%22%22%2C%22%22%2C1532684635%2C%22https%3A%2F%2Fwww.douban.com%2Fpeople%2Fitzhaoxiangyu%2F%22%5D; _pk_ses.100001.4cf6=*; __utma=30149280.546083573.1527832081.1532676725.1532684635.16; __utmb=30149280.0.10.1532684635; __utma=223695111.344951148.1527832081.1532676742.1532684635.16; __utmb=223695111.0.10.1532684635; _pk_id.100001.4cf6=0710816efa653b27.1527832081.16.1532684640.1532681254.')
 	douban.main()

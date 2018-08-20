@@ -56,6 +56,24 @@ class douban_mysql:
 			logging.error(traceback.print_exc())
 			self.db.rollback()
 
+	def update_user(self, id, movie_all):
+		'''
+		更新用户的列表
+		:param id: 用户id
+		:param movie_all:新的电影数量
+		:return:
+		'''
+		sql = 'UPDATE douban_user SET movie_all = %s WHERE id=%s' % (movie_all, id)
+		try:
+			self.cursor.execute(sql)
+			self.db.commit()
+			print('update user_id:%s successful'%id)
+		except:
+			print('update douban_user fail')
+			logging.error(traceback.print_exc())
+			self.db.rollback()
+
+
 	def add_movie(self, name, summary, user_id, username, score, movie_path):
 		'''
 		插入用户的电影数据
@@ -115,6 +133,21 @@ class douban_mysql:
 		one = self.cursor.fetchone()
 		if one and int(one[0]) > MAX:
 			print('already get 500 movies')
+			return True
+		else:
+			return False
+
+	def find_all(self, username, MAX=500):
+		'''
+		查找是否有满足条件的给定数量的电影
+		:param user_id:
+		:return:
+		'''
+		sql = "SELECT count(*) from douban_movie WHERE user_name='%s'" % username
+		self.cursor.execute(sql)
+		one = self.cursor.fetchone()
+		if one and int(one[0]) >= MAX:
+			print('already get all movies')
 			return True
 		else:
 			return False
