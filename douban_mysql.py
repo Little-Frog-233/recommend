@@ -183,220 +183,220 @@ class douban_mysql:
 					print('movie %s is not in movie_list' % result[0])
 
 
-def add_movie_list_all(self):
-	'''
-	将douban_movie中的所有电影插入到movie_list中并生成每个电影对应的id
-	:return:
-	'''
-	sql = 'SELECT name,summary,DISTINCT movie_path FROM douban_movie'
-	self.cursor.execute(sql)
-	all = self.cursor.fetchall()
-	for item in all:
-		id = self.find_movie_id(item[2], item[0])
-		if id == None:
-			sql_movie = 'INSERT INTO movie_list(name,summary,movie_path) values(%s,%s,%s)'
-			try:
-				self.cursor.execute(sql_movie, (item[0], item[1], item[2]))
-				self.db.commit()
-			except:
-				print('add douban_movie fail')
-				self.db.rollback()
+	def add_movie_list_all(self):
+		'''
+		将douban_movie中的所有电影插入到movie_list中并生成每个电影对应的id
+		:return:
+		'''
+		sql = 'SELECT name,summary,DISTINCT movie_path FROM douban_movie'
+		self.cursor.execute(sql)
+		all = self.cursor.fetchall()
+		for item in all:
+			id = self.find_movie_id(item[2], item[0])
+			if id == None:
+				sql_movie = 'INSERT INTO movie_list(name,summary,movie_path) values(%s,%s,%s)'
+				try:
+					self.cursor.execute(sql_movie, (item[0], item[1], item[2]))
+					self.db.commit()
+				except:
+					print('add douban_movie fail')
+					self.db.rollback()
+			else:
+				print('''this movie %s is already exists''' % item[0])
+
+
+	def add_movie_list(self, name, summary, movie_path):
+		'''
+		将一部电影插入movie_list
+		:param name: 电影名称
+		:param summary: 电影简介
+		:param movie_path: 电影主页面
+		:return:
+		'''
+		sql_movie = 'INSERT INTO movie_list(name,summary,movie_path) values(%s,%s,%s)'
+		try:
+			self.cursor.execute(sql_movie, (name, summary, movie_path))
+			self.db.commit()
+		except:
+			print('add douban_movie fail')
+			self.db.rollback()
+
+
+	def add_recommend_user(self, userId, movieId):
+		'''
+		基于用户的推荐列表
+		:param userId:
+		:param movieId:
+		:return:
+		'''
+		sql = 'INSERT INTO userRecs_list(user_id,movie_id) values(%s,%s)'
+		try:
+			self.cursor.execute(sql, (userId, movieId))
+			self.db.commit()
+		except:
+			print('add douban_movie fail')
+			self.db.rollback()
+
+
+	def update_recommend_user(self, userId, movieId):
+		'''
+		更新基于用户的推荐列表
+		:param userId:
+		:param movieId:
+		:return:
+		'''
+		sql = '''UPDATE userRecs_list SET movie_id='%s' WHERE user_id=%s''' % (movieId, userId)
+		try:
+			self.cursor.execute(sql)
+			self.db.commit()
+			print('update userRecs_list successful')
+		except:
+			print('update userRecs_list fail')
+			self.db.rollback()
+
+
+	def add_recommend_movie(self, movieId, userId):
+		'''
+		基于电影的推荐列表
+		:param movieId:
+		:param userId:
+		:return:
+		'''
+		sql = 'INSERT INTO movieRecs_list(movie_id,movie_id_list) values(%s,%s)'
+		try:
+			self.cursor.execute(sql, (movieId, userId))
+			self.db.commit()
+		except:
+			print('add douban_movie fail')
+			self.db.rollback()
+
+
+	def update_recommend_movie(self, movieId, userId):
+		'''
+		更新基于用户的推荐列表
+		:param userId:
+		:param movieId:
+		:return:
+		'''
+		sql = '''UPDATE movieRecs_list SET movie_id_list='%s' WHERE movie_id=%s''' % (userId, movieId)
+		try:
+			self.cursor.execute(sql)
+			self.db.commit()
+			print('update movieRecs_list successful')
+		except:
+			print('update movieRecs_list fail')
+			self.db.rollback()
+
+
+	def find_movie_id(self, movie_path, name):
+		'''
+		查询一部电影是否已经在movie_list中
+		:param movie_path: 电影主页面
+		:param name: 电影名称
+		:return:
+		'''
+		sql = "SELECT id FROM movie_list WHERE movie_path='%s'" % movie_path
+		self.cursor.execute(sql)
+		one = self.cursor.fetchone()
+		if one:
+			print('''this movie %s is already exists in movie_list''' % name)
+			return int(one[0])
 		else:
-			print('''this movie %s is already exists''' % item[0])
+			return None
 
 
-def add_movie_list(self, name, summary, movie_path):
-	'''
-	将一部电影插入movie_list
-	:param name: 电影名称
-	:param summary: 电影简介
-	:param movie_path: 电影主页面
-	:return:
-	'''
-	sql_movie = 'INSERT INTO movie_list(name,summary,movie_path) values(%s,%s,%s)'
-	try:
-		self.cursor.execute(sql_movie, (name, summary, movie_path))
-		self.db.commit()
-	except:
-		print('add douban_movie fail')
-		self.db.rollback()
-
-
-def add_recommend_user(self, userId, movieId):
-	'''
-	基于用户的推荐列表
-	:param userId:
-	:param movieId:
-	:return:
-	'''
-	sql = 'INSERT INTO userRecs_list(user_id,movie_id) values(%s,%s)'
-	try:
-		self.cursor.execute(sql, (userId, movieId))
-		self.db.commit()
-	except:
-		print('add douban_movie fail')
-		self.db.rollback()
-
-
-def update_recommend_user(self, userId, movieId):
-	'''
-	更新基于用户的推荐列表
-	:param userId:
-	:param movieId:
-	:return:
-	'''
-	sql = '''UPDATE userRecs_list SET movie_id='%s' WHERE user_id=%s''' % (movieId, userId)
-	try:
+	def find_movie_by_id(self, id):
+		'''
+		根据id查找相应的电影
+		:param id:
+		:return:
+		'''
+		sql = "SELECT name FROM movie_list WHERE id=%s" % id
 		self.cursor.execute(sql)
-		self.db.commit()
-		print('update userRecs_list successful')
-	except:
-		print('update userRecs_list fail')
-		self.db.rollback()
+		one = self.cursor.fetchone()
+		if one:
+			return one[0]
+		else:
+			return None
 
 
-def add_recommend_movie(self, movieId, userId):
-	'''
-	基于电影的推荐列表
-	:param movieId:
-	:param userId:
-	:return:
-	'''
-	sql = 'INSERT INTO movieRecs_list(movie_id,movie_id_list) values(%s,%s)'
-	try:
-		self.cursor.execute(sql, (movieId, userId))
-		self.db.commit()
-	except:
-		print('add douban_movie fail')
-		self.db.rollback()
-
-
-def update_recommend_movie(self, movieId, userId):
-	'''
-	更新基于用户的推荐列表
-	:param userId:
-	:param movieId:
-	:return:
-	'''
-	sql = '''UPDATE movieRecs_list SET movie_id_list='%s' WHERE movie_id=%s''' % (userId, movieId)
-	try:
+	def find_user_by_id(self, id):
+		'''
+		根据id查找对应的用户
+		:param id:
+		:return:
+		'''
+		sql = "SELECT name FROM douban_user WHERE id=%s" % id
 		self.cursor.execute(sql)
-		self.db.commit()
-		print('update movieRecs_list successful')
-	except:
-		print('update movieRecs_list fail')
-		self.db.rollback()
+		one = self.cursor.fetchone()
+		if one:
+			return one[0]
+		else:
+			return None
 
 
-def find_movie_id(self, movie_path, name):
-	'''
-	查询一部电影是否已经在movie_list中
-	:param movie_path: 电影主页面
-	:param name: 电影名称
-	:return:
-	'''
-	sql = "SELECT id FROM movie_list WHERE movie_path='%s'" % movie_path
-	self.cursor.execute(sql)
-	one = self.cursor.fetchone()
-	if one:
-		print('''this movie %s is already exists in movie_list''' % name)
-		return int(one[0])
-	else:
-		return None
+	def find_user_in_rec(self, id):
+		'''
+		在推荐列表中查找用户用于更新推荐
+		:param id:
+		:return:
+		'''
+		sql = "SELECT * FROM userRecs_list where user_id=%s" % id
+		self.cursor.execute(sql)
+		one = self.cursor.fetchone()
+		if one:
+			print('this userId %s is already exists' % id)
+			return True
+		else:
+			return False
 
 
-def find_movie_by_id(self, id):
-	'''
-	根据id查找相应的电影
-	:param id:
-	:return:
-	'''
-	sql = "SELECT name FROM movie_list WHERE id=%s" % id
-	self.cursor.execute(sql)
-	one = self.cursor.fetchone()
-	if one:
-		return one[0]
-	else:
-		return None
+	def find_movie_in_rec(self, id):
+		'''
+		在推荐列表中查找电影用于更新推荐
+		:param id:
+		:return:
+		'''
+		sql = "SELECT * FROM movieRecs_list where movie_id=%s" % id
+		self.cursor.execute(sql)
+		one = self.cursor.fetchone()
+		if one:
+			print('this movieId %s is already exists' % id)
+			return True
+		else:
+			return False
 
 
-def find_user_by_id(self, id):
-	'''
-	根据id查找对应的用户
-	:param id:
-	:return:
-	'''
-	sql = "SELECT name FROM douban_user WHERE id=%s" % id
-	self.cursor.execute(sql)
-	one = self.cursor.fetchone()
-	if one:
-		return one[0]
-	else:
-		return None
+	def userRec_list(self, id):
+		'''
+		查找指定用户的推荐列表
+		:param id:用户id
+		:return: 推荐列表
+		'''
+		sql = "SELECT movie_id FROM userRecs_list WHERE user_id=%s" % id
+		self.cursor.execute(sql)
+		one = self.cursor.fetchone()
+		if one:
+			return [int(i) for i in one[0].strip('[').strip(']').split(',')]
+		else:
+			print('this user %s not in userRecs_list' % id)
+			return None
 
 
-def find_user_in_rec(self, id):
-	'''
-	在推荐列表中查找用户用于更新推荐
-	:param id:
-	:return:
-	'''
-	sql = "SELECT * FROM userRecs_list where user_id=%s" % id
-	self.cursor.execute(sql)
-	one = self.cursor.fetchone()
-	if one:
-		print('this userId %s is already exists' % id)
-		return True
-	else:
-		return False
-
-
-def find_movie_in_rec(self, id):
-	'''
-	在推荐列表中查找电影用于更新推荐
-	:param id:
-	:return:
-	'''
-	sql = "SELECT * FROM movieRecs_list where movie_id=%s" % id
-	self.cursor.execute(sql)
-	one = self.cursor.fetchone()
-	if one:
-		print('this movieId %s is already exists' % id)
-		return True
-	else:
-		return False
-
-
-def userRec_list(self, id):
-	'''
-	查找指定用户的推荐列表
-	:param id:用户id
-	:return: 推荐列表
-	'''
-	sql = "SELECT movie_id FROM userRecs_list WHERE user_id=%s" % id
-	self.cursor.execute(sql)
-	one = self.cursor.fetchone()
-	if one:
-		return [int(i) for i in one[0].strip('[').strip(']').split(',')]
-	else:
-		print('this user %s not in userRecs_list' % id)
-		return None
-
-
-def movieRec_list(self, id):
-	'''
-	查找指定电影的推荐列表
-	:param id: 电影id
-	:return: 推荐列表
-	'''
-	sql = "SELECT movie_id_list FROM movieRecs_list WHERE movie_id=%s" % id
-	self.cursor.execute(sql)
-	one = self.cursor.fetchone()
-	if one:
-		return [int(i) for i in one[0].strip('[').strip(']').split(', ')]
-	else:
-		print('this movie %s not in movieRecs_list' % id)
-		return None
+	def movieRec_list(self, id):
+		'''
+		查找指定电影的推荐列表
+		:param id: 电影id
+		:return: 推荐列表
+		'''
+		sql = "SELECT movie_id_list FROM movieRecs_list WHERE movie_id=%s" % id
+		self.cursor.execute(sql)
+		one = self.cursor.fetchone()
+		if one:
+			return [int(i) for i in one[0].strip('[').strip(']').split(', ')]
+		else:
+			print('this movie %s not in movieRecs_list' % id)
+			return None
 
 
 if __name__ == '__main__':
