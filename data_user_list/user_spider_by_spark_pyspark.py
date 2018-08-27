@@ -7,9 +7,29 @@ from pyspark.sql import SparkSession
 from spider_tool.moive_spider import douban_movie
 
 
+def get_proxy(proxyUser, proxyPass):
+	'''
+	阿布云代理设置
+	:param proxyUser: http隧道通行证书
+	:param proxyPass: http隧道通行密钥
+	:return:
+	'''
+	proxyHost = "proxy.abuyun.com"
+	proxyPort = "9010"
+	proxyUser = proxyUser
+	proxyPass = proxyPass
+	proxyMeta = "%(user)s:%(pass)s@%(host)s:%(port)s" % {
+		"host": proxyHost,
+		"port": proxyPort,
+		"user": proxyUser,
+		"pass": proxyPass,
+	}
+	return proxyMeta
+
+
 def func(x):
 	try:
-		db = douban_movie(x[0], get_all=True)
+		db = douban_movie(x[0], get_all=False, proxy=get_proxy("HTRS2F7560829W8P", "67FCEB9CD8F667F8"))
 		db.main()
 	except:
 		print('error happened and the name is ', x[1])
