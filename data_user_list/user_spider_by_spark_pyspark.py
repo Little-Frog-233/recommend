@@ -15,7 +15,7 @@ def get_proxy(proxyUser, proxyPass):
 	:return:
 	'''
 	proxyHost = "proxy.abuyun.com"
-	proxyPort = "9010"
+	proxyPort = "9020"
 	proxyUser = proxyUser
 	proxyPass = proxyPass
 	proxyMeta = "%(user)s:%(pass)s@%(host)s:%(port)s" % {
@@ -29,7 +29,7 @@ def get_proxy(proxyUser, proxyPass):
 
 def func(x):
 	try:
-		db = douban_movie(x[0], get_all=False, proxy=get_proxy("HTRS2F7560829W8P", "67FCEB9CD8F667F8"))
+		db = douban_movie(x[0], get_all=False, proxy=get_proxy("HO71Q57K620ZKRED", "E30286E11CB9A974"))
 		db.main()
 	except:
 		print('error happened and the name is ', x[1])
@@ -48,4 +48,4 @@ if __name__ == '__main__':
 	spark = SparkSession.builder.appName('Spark-Spider').getOrCreate()
 	sc = spark.sparkContext
 	rdd = sc.textFile(path)
-	rdd.map(cut_line).repartition(10).foreach(func)
+	rdd.map(cut_line).repartition(5).foreach(func)
