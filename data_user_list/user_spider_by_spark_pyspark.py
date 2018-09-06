@@ -1,4 +1,6 @@
 # coding: utf-8
+import sys
+sys.path.append('/Users/ruicheng/PycharmProjects/Collaborative_filter/')
 import os
 import findspark
 
@@ -29,7 +31,8 @@ def get_proxy(proxyUser, proxyPass):
 
 def func(x):
 	try:
-		db = douban_movie(x[0], get_all=False, proxy=get_proxy("HO71Q57K620ZKRED", "E30286E11CB9A974"))
+		# db = douban_movie(x[0], get_all=False, proxy=get_proxy("HO71Q57K620ZKRED", "E30286E11CB9A974"))
+		db = douban_movie(x[0], get_all=False)
 		db.main()
 	except:
 		print('error happened and the name is ', x[1])
@@ -49,3 +52,4 @@ if __name__ == '__main__':
 	sc = spark.sparkContext
 	rdd = sc.textFile(path)
 	rdd.map(cut_line).repartition(5).foreach(func)
+
