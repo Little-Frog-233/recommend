@@ -1,6 +1,6 @@
 # coding: utf-8
 import sys
-sys.path.append('/Users/ruicheng/PycharmProjects/Collaborative_filter/')
+sys.path.append('../')
 import os
 import findspark
 
